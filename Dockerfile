@@ -10,4 +10,5 @@ accelerate==0.32.1 \
 bitsandbytes==0.43.1 \
 faiss-cpu==1.7.4 \
 tensorboard==2.14.0 \
+modelscope \
 "black[jupyter]"

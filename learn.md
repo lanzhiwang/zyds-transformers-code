@@ -12,7 +12,7 @@ docker run -it --rm --name "huggingface" \
 -p 10000:8888 \
 --gpus all \
 -v ~/zyds-transformers-code:/home/jovyan/work/zyds-transformers-code \
-lanzhiwang/minimal-notebook-x86_64-python-3-11-6:sha-4f832af
+lanzhiwang/minimal-notebook-x86_64-python-3-11-6:sha-18ca95a
 
 http://192.168.100.59:10000/lab?token=a6795bc13ab756d8110f8ce6c985f3f537e8d9a394d0b7ab
 
@@ -41,5 +41,5 @@ True
 uv pip -v install transformers==4.42.4 peft==0.11.1 datasets==2.20.0 accelerate==0.32.1 bitsandbytes==0.43.1 faiss-cpu==1.7.4 tensorboard==2.14.0
 
 uv pip -v install "black[jupyter]"
-
+uv pip -v install modelscope "black[jupyter]"
 ```
