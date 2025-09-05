@@ -12,7 +12,8 @@ class CMRC2018TRIAL(datasets.GeneratorBasedBuilder):
         """
         return datasets.DatasetInfo(
             description="CMRC2018 trial",
-            features=datasets.Features({
+            features=datasets.Features(
+                {
                     "id": datasets.Value("string"),
                     "context": datasets.Value("string"),
                     "question": datasets.Value("string"),
@@ -21,8 +22,9 @@ class CMRC2018TRIAL(datasets.GeneratorBasedBuilder):
                             "text": datasets.Value("string"),
                             "answer_start": datasets.Value("int32"),
                         }
-                    )
-                })
+                    ),
+                }
+            ),
         )
 
     def _split_generators(self, dl_manager: DownloadManager):
@@ -34,8 +36,12 @@ class CMRC2018TRIAL(datasets.GeneratorBasedBuilder):
         :param dl_manager:
         :return: [ datasets.SplitGenerator ]
         """
-        return [datasets.SplitGenerator(name=datasets.Split.TRAIN, 
-                                        gen_kwargs={"filepath": "./cmrc2018_trial.json"})]
+        return [
+            datasets.SplitGenerator(
+                name=datasets.Split.TRAIN,
+                gen_kwargs={"filepath": "./cmrc2018_trial.json"},
+            )
+        ]
 
     def _generate_examples(self, filepath):
         """
@@ -54,7 +60,9 @@ class CMRC2018TRIAL(datasets.GeneratorBasedBuilder):
                         question = qa["question"].strip()
                         id_ = qa["id"]
 
-                        answer_starts = [answer["answer_start"] for answer in qa["answers"]]
+                        answer_starts = [
+                            answer["answer_start"] for answer in qa["answers"]
+                        ]
                         answers = [answer["text"].strip() for answer in qa["answers"]]
 
                         yield id_, {
@@ -66,5 +74,3 @@ class CMRC2018TRIAL(datasets.GeneratorBasedBuilder):
                                 "text": answers,
                             },
                         }
-
-

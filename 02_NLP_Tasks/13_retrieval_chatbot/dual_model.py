@@ -4,6 +4,7 @@ from typing import Optional
 from transformers.configuration_utils import PretrainedConfig
 from torch.nn import CosineSimilarity, CosineEmbeddingLoss
 
+
 class DualModel(BertPreTrainedModel):
 
     def __init__(self, config: PretrainedConfig, *inputs, **kwargs):
@@ -24,12 +25,20 @@ class DualModel(BertPreTrainedModel):
         output_hidden_states: Optional[bool] = None,
         return_dict: Optional[bool] = None,
     ):
-        return_dict = return_dict if return_dict is not None else self.config.use_return_dict
+        return_dict = (
+            return_dict if return_dict is not None else self.config.use_return_dict
+        )
 
         # Step1 分别获取sentenceA 和 sentenceB的输入
         senA_input_ids, senB_input_ids = input_ids[:, 0], input_ids[:, 1]
-        senA_attention_mask, senB_attention_mask = attention_mask[:, 0], attention_mask[:, 1]
-        senA_token_type_ids, senB_token_type_ids = token_type_ids[:, 0], token_type_ids[:, 1]
+        senA_attention_mask, senB_attention_mask = (
+            attention_mask[:, 0],
+            attention_mask[:, 1],
+        )
+        senA_token_type_ids, senB_token_type_ids = (
+            token_type_ids[:, 0],
+            token_type_ids[:, 1],
+        )
 
         # Step2 分别获取sentenceA 和 sentenceB的向量表示
         senA_outputs = self.bert(
@@ -44,7 +53,7 @@ class DualModel(BertPreTrainedModel):
             return_dict=return_dict,
         )
 
-        senA_pooled_output = senA_outputs[1]    # [batch, hidden]
+        senA_pooled_output = senA_outputs[1]  # [batch, hidden]
 
         senB_outputs = self.bert(
             senB_input_ids,
@@ -58,11 +67,11 @@ class DualModel(BertPreTrainedModel):
             return_dict=return_dict,
         )
 
-        senB_pooled_output = senB_outputs[1]    # [batch, hidden]
+        senB_pooled_output = senB_outputs[1]  # [batch, hidden]
 
         # step3 计算相似度
 
-        cos = CosineSimilarity()(senA_pooled_output, senB_pooled_output)    # [batch, ]
+        cos = CosineSimilarity()(senA_pooled_output, senB_pooled_output)  # [batch, ]
 
         # step4 计算loss
 

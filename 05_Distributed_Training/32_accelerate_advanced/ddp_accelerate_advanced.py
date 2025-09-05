@@ -21,7 +21,7 @@ class MyDataset(Dataset):
 
     def __getitem__(self, index):
         return self.data.iloc[index]["review"], self.data.iloc[index]["label"]
-    
+
     def __len__(self):
         return len(self.data)
 
@@ -30,7 +30,9 @@ def prepare_dataloader():
 
     dataset = MyDataset()
 
-    trainset, validset = random_split(dataset, lengths=[0.9, 0.1], generator=torch.Generator().manual_seed(42))
+    trainset, validset = random_split(
+        dataset, lengths=[0.9, 0.1], generator=torch.Generator().manual_seed(42)
+    )
 
     tokenizer = BertTokenizer.from_pretrained("/gemini/code/model")
 
@@ -39,12 +41,22 @@ def prepare_dataloader():
         for item in batch:
             texts.append(item[0])
             labels.append(item[1])
-        inputs = tokenizer(texts, max_length=128, padding="max_length", truncation=True, return_tensors="pt")
+        inputs = tokenizer(
+            texts,
+            max_length=128,
+            padding="max_length",
+            truncation=True,
+            return_tensors="pt",
+        )
         inputs["labels"] = torch.tensor(labels)
         return inputs
 
-    trainloader = DataLoader(trainset, batch_size=32, collate_fn=collate_func, shuffle=True)
-    validloader = DataLoader(validset, batch_size=64, collate_fn=collate_func, shuffle=False)
+    trainloader = DataLoader(
+        trainset, batch_size=32, collate_fn=collate_func, shuffle=True
+    )
+    validloader = DataLoader(
+        validset, batch_size=64, collate_fn=collate_func, shuffle=False
+    )
 
     return trainloader, validloader
 
@@ -76,7 +88,16 @@ def evaluate(model, validloader, accelerator: Accelerator):
     return acc_num / len(validloader.dataset)
 
 
-def train(model, optimizer, trainloader, validloader, accelerator: Accelerator, resume, epoch=3, log_step=10):
+def train(
+    model,
+    optimizer,
+    trainloader,
+    validloader,
+    accelerator: Accelerator,
+    resume,
+    epoch=3,
+    log_step=10,
+):
     global_step = 0
     start_time = time.time()
 
@@ -85,7 +106,9 @@ def train(model, optimizer, trainloader, validloader, accelerator: Accelerator, 
 
     if resume is not None:
         accelerator.load_state(resume)
-        steps_per_epoch = math.ceil(len(trainloader) / accelerator.gradient_accumulation_steps)
+        steps_per_epoch = math.ceil(
+            len(trainloader) / accelerator.gradient_accumulation_steps
+        )
         resume_step = global_step = int(resume.split("step_")[-1])
         resume_epoch = resume_step // steps_per_epoch
         resume_step -= resume_epoch * steps_per_epoch
@@ -94,7 +117,9 @@ def train(model, optimizer, trainloader, validloader, accelerator: Accelerator, 
     for ep in range(resume_epoch, epoch):
         model.train()
         if resume and ep == resume_epoch and resume_step != 0:
-            active_dataloader = accelerator.skip_first_batches(trainloader, resume_step * accelerator.gradient_accumulation_steps)
+            active_dataloader = accelerator.skip_first_batches(
+                trainloader, resume_step * accelerator.gradient_accumulation_steps
+            )
         else:
             active_dataloader = trainloader
         for batch in active_dataloader:
@@ -110,17 +135,22 @@ def train(model, optimizer, trainloader, validloader, accelerator: Accelerator, 
 
                     if global_step % log_step == 0:
                         loss = accelerator.reduce(loss, "mean")
-                        accelerator.print(f"ep: {ep}, global_step: {global_step}, loss: {loss.item()}")
+                        accelerator.print(
+                            f"ep: {ep}, global_step: {global_step}, loss: {loss.item()}"
+                        )
                         accelerator.log({"loss": loss.item()}, global_step)
 
                     if global_step % 50 == 0 and global_step != 0:
                         accelerator.print(f"save checkpoint -> step_{global_step}")
-                        accelerator.save_state(accelerator.project_dir + f"/step_{global_step}")
+                        accelerator.save_state(
+                            accelerator.project_dir + f"/step_{global_step}"
+                        )
                         accelerator.unwrap_model(model).save_pretrained(
-                            save_directory=accelerator.project_dir + f"/step_{global_step}/model",
+                            save_directory=accelerator.project_dir
+                            + f"/step_{global_step}/model",
                             is_main_process=accelerator.is_main_process,
                             state_dict=accelerator.get_state_dict(model),
-                            save_func=accelerator.save
+                            save_func=accelerator.save,
                         )
         acc = evaluate(model, validloader, accelerator)
         accelerator.print(f"ep: {ep}, acc: {acc}, time: {time.time() - start_time}")
@@ -131,7 +161,9 @@ def train(model, optimizer, trainloader, validloader, accelerator: Accelerator, 
 
 def main():
 
-    accelerator = Accelerator(gradient_accumulation_steps=2, log_with="tensorboard", project_dir="ckpts")
+    accelerator = Accelerator(
+        gradient_accumulation_steps=2, log_with="tensorboard", project_dir="ckpts"
+    )
 
     accelerator.init_trackers("runs")
 
@@ -139,9 +171,18 @@ def main():
 
     model, optimizer = prepare_model_and_optimizer()
 
-    model, optimizer, trainloader, validloader = accelerator.prepare(model, optimizer, trainloader, validloader)
+    model, optimizer, trainloader, validloader = accelerator.prepare(
+        model, optimizer, trainloader, validloader
+    )
 
-    train(model, optimizer, trainloader, validloader, accelerator, resume="/gemini/code/ckpts/step_150")
+    train(
+        model,
+        optimizer,
+        trainloader,
+        validloader,
+        accelerator,
+        resume="/gemini/code/ckpts/step_150",
+    )
 
 
 if __name__ == "__main__":

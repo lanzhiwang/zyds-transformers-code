@@ -18,7 +18,7 @@ class MyDataset(Dataset):
 
     def __getitem__(self, index):
         return self.data.iloc[index]["review"], self.data.iloc[index]["label"]
-    
+
     def __len__(self):
         return len(self.data)
 
@@ -27,7 +27,9 @@ def prepare_dataloader():
 
     dataset = MyDataset()
 
-    trainset, validset = random_split(dataset, lengths=[0.9, 0.1], generator=torch.Generator().manual_seed(42))
+    trainset, validset = random_split(
+        dataset, lengths=[0.9, 0.1], generator=torch.Generator().manual_seed(42)
+    )
 
     tokenizer = BertTokenizer.from_pretrained("/gemini/code/model")
 
@@ -36,12 +38,22 @@ def prepare_dataloader():
         for item in batch:
             texts.append(item[0])
             labels.append(item[1])
-        inputs = tokenizer(texts, max_length=128, padding="max_length", truncation=True, return_tensors="pt")
+        inputs = tokenizer(
+            texts,
+            max_length=128,
+            padding="max_length",
+            truncation=True,
+            return_tensors="pt",
+        )
         inputs["labels"] = torch.tensor(labels)
         return inputs
 
-    trainloader = DataLoader(trainset, batch_size=32, collate_fn=collate_func, shuffle=True)
-    validloader = DataLoader(validset, batch_size=64, collate_fn=collate_func, shuffle=False)
+    trainloader = DataLoader(
+        trainset, batch_size=32, collate_fn=collate_func, shuffle=True
+    )
+    validloader = DataLoader(
+        validset, batch_size=64, collate_fn=collate_func, shuffle=False
+    )
 
     return trainloader, validloader
 
@@ -67,7 +79,15 @@ def evaluate(model, validloader, accelerator: Accelerator):
     return acc_num / len(validloader.dataset)
 
 
-def train(model, optimizer, trainloader, validloader, accelerator: Accelerator, epoch=3, log_step=10):
+def train(
+    model,
+    optimizer,
+    trainloader,
+    validloader,
+    accelerator: Accelerator,
+    epoch=3,
+    log_step=10,
+):
     global_step = 0
     for ep in range(epoch):
         model.train()
@@ -79,7 +99,9 @@ def train(model, optimizer, trainloader, validloader, accelerator: Accelerator, 
             optimizer.step()
             if global_step % log_step == 0:
                 loss = accelerator.reduce(loss, "mean")
-                accelerator.print(f"ep: {ep}, global_step: {global_step}, loss: {loss.item()}")
+                accelerator.print(
+                    f"ep: {ep}, global_step: {global_step}, loss: {loss.item()}"
+                )
             global_step += 1
         acc = evaluate(model, validloader, accelerator)
         accelerator.print(f"ep: {ep}, acc: {acc}")
@@ -93,7 +115,9 @@ def main():
 
     model, optimizer = prepare_model_and_optimizer()
 
-    model, optimizer, trainloader, validloader = accelerator.prepare(model, optimizer, trainloader, validloader)
+    model, optimizer, trainloader, validloader = accelerator.prepare(
+        model, optimizer, trainloader, validloader
+    )
 
     train(model, optimizer, trainloader, validloader, accelerator)
 
