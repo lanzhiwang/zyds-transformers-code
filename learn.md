@@ -12,7 +12,7 @@ docker run -it --rm --name "huggingface" \
 -p 10000:8888 \
 --gpus all \
 -v ~/zyds-transformers-code:/home/jovyan/work/zyds-transformers-code \
-lanzhiwang/minimal-notebook-x86_64-python-3-11-6:sha-18ca95a
+lanzhiwang/minimal-notebook-x86_64-python-3-11-6:sha-f2219c6
 
 http://192.168.100.59:10000/lab?token=a6795bc13ab756d8110f8ce6c985f3f537e8d9a394d0b7ab
 
