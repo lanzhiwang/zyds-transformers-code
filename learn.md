@@ -42,4 +42,15 @@ uv pip -v install transformers==4.42.4 peft==0.11.1 datasets==2.20.0 accelerate=
 
 uv pip -v install "black[jupyter]"
 uv pip -v install modelscope "black[jupyter]"
+
+############ 下载模型和数据集
+
+export HF_ENDPOINT=https://hf-mirror.com
+
+# 下载模型
+HF_ENDPOINT=https://hf-mirror.com hf download uer/roberta-base-chinese-extractive-qa --local-dir ./models/uer/roberta-base-chinese-extractive-qa/
+
+# 下载数据集
+HF_ENDPOINT=https://hf-mirror.com hf download --repo-type dataset wikitext --local-dir ./dataset/wikitext
+
 ```
