@@ -47,7 +47,9 @@ uv pip -v install modelscope "black[jupyter]"
 export HF_ENDPOINT=https://hf-mirror.com
 
 # 下载模型
-HF_ENDPOINT=https://hf-mirror.com hf download uer/roberta-base-chinese-extractive-qa --local-dir ./models/uer/roberta-base-chinese-extractive-qa/
+HF_ENDPOINT=https://hf-mirror.com hf download Langboat/bloom-1b4-zh --local-dir ./models/Langboat/bloom-1b4-zh/
+
+modelscope download --model Langboat/bloom-1b4-zh --local_dir ./models/Langboat/bloom-1b4-zh/
 
 # 下载数据集
 HF_ENDPOINT=https://hf-mirror.com hf download --repo-type dataset wikitext --local-dir ./dataset/wikitext
