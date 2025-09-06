@@ -9,6 +9,7 @@ RUN pip -v install torch==2.4.0 torchvision==0.19.0 torchaudio==2.4.0 --index-ur
         bitsandbytes==0.43.1 \
         faiss-cpu==1.7.4 \
         tensorboard==2.14.0 \
+        evaluate \
         modelscope \
         "black[jupyter]" && \
     pip cache purge
