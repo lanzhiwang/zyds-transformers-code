@@ -75,6 +75,8 @@ train_args = TrainingArguments(
     # 训练完成后加载最优模型
     load_best_model_at_end=True,
     report_to="none",
+    ddp_find_unused_parameters=False,
+
 )
 print("train_args._n_gpu:", train_args._n_gpu)
 
