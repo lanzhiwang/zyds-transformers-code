@@ -3,11 +3,6 @@
 """
 
 ## Step1 导入相关包
-import os
-
-print("os.environ:", os.environ)
-
-
 from transformers import (
     AutoTokenizer,
     AutoModelForSequenceClassification,
@@ -18,14 +13,12 @@ from transformers import DataCollatorWithPadding
 
 from datasets import load_dataset
 
-
 ## Step2 加载数据集
 dataset = load_dataset("csv", data_files="./ChnSentiCorp_htl_all.csv", split="train")
 dataset = dataset.filter(lambda x: x["review"] is not None)
 
 ## Step3 划分数据集
 datasets = dataset.train_test_split(test_size=0.1, seed=42)
-
 
 ## Step4 数据集预处理
 tokenizer = AutoTokenizer.from_pretrained("/root/LLaMA-Factory/models/hfl/rbt3")
@@ -46,9 +39,6 @@ tokenized_datasets = datasets.map(
 model = AutoModelForSequenceClassification.from_pretrained(
     "/root/LLaMA-Factory/models/hfl/rbt3"
 )
-print("model:", model)
-print("model.device:", model.device)
-
 
 ## Step6 创建 TrainingArguments
 train_args = TrainingArguments(
@@ -76,8 +66,8 @@ train_args = TrainingArguments(
     load_best_model_at_end=True,
     report_to="none",
     ddp_find_unused_parameters=False,
+    bf16=True,
 )
-print("train_args._n_gpu:", train_args._n_gpu)
 
 
 ## Step7 创建 Trainer
@@ -92,5 +82,8 @@ trainer = Trainer(
 ## Step8 模型训练
 trainer.train()
 
-
-# CUDA_VISIBLE_DEVICES="2,3,4,5" torchrun --nproc_per_node=4 03_ddp_trainer.py
+# CUDA_VISIBLE_DEVICES="2,3" accelerate launch 02_ddp_trainer.py
+# CUDA_VISIBLE_DEVICES="2,3" accelerate launch --config_file accelerate/default_config.yaml 02_ddp_trainer.py
+# CUDA_VISIBLE_DEVICES="2,3" accelerate launch --config_file accelerate/01_config.yaml 02_ddp_trainer.py
+# CUDA_VISIBLE_DEVICES="2,3" accelerate launch --config_file accelerate/02_config.yaml 02_ddp_trainer.py
+# CUDA_VISIBLE_DEVICES="2,3" accelerate launch --config_file accelerate/03_config.yaml 02_ddp_trainer.py
